@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { ActivityIndicator, Card } from "react-native-paper";
+import { MaterialIcons } from "@expo/vector-icons"; // Import icon library
 
 type NewsItem = {
   title: string;
@@ -50,10 +51,23 @@ const HomeScreen: React.FC = () => {
     },
   ]);
 
+  const [favorites, setFavorites] = useState<NewsItem[]>([]); // State for favorites
   const [weather, setWeather] = useState<WeatherItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState<string>("news");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const toggleFavorite = (item: NewsItem) => {
+    setFavorites((prevFavorites) => {
+      if (prevFavorites.some((fav) => fav.title === item.title)) {
+        // Remove from favorites if already exists
+        return prevFavorites.filter((fav) => fav.title !== item.title);
+      } else {
+        // Add to favorites
+        return [...prevFavorites, item];
+      }
+    });
+  };
 
   const fetchWeather = async (query: string) => {
     setLoading(true);
@@ -93,6 +107,20 @@ const HomeScreen: React.FC = () => {
               <Card.Content>
                 <Text style={styles.title}>{item.title}</Text>
                 <Text style={styles.description}>{item.description}</Text>
+                <TouchableOpacity
+                  style={styles.favoriteIcon}
+                  onPress={() => toggleFavorite(item)}
+                >
+                  <MaterialIcons
+                    name={
+                      favorites.some((fav) => fav.title === item.title)
+                        ? "favorite"
+                        : "favorite-border"
+                    }
+                    size={24}
+                    color="red"
+                  />
+                </TouchableOpacity>
               </Card.Content>
             </Card>
           )}
@@ -116,6 +144,20 @@ const HomeScreen: React.FC = () => {
               <Card.Content>
                 <Text style={styles.title}>{item.title}</Text>
                 <Text style={styles.description}>{item.description}</Text>
+                <TouchableOpacity
+                  style={styles.favoriteIcon}
+                  onPress={() => toggleFavorite(item)}
+                >
+                  <MaterialIcons
+                    name={
+                      favorites.some((fav) => fav.title === item.title)
+                        ? "favorite"
+                        : "favorite-border"
+                    }
+                    size={24}
+                    color="red"
+                  />
+                </TouchableOpacity>
               </Card.Content>
             </Card>
           )}
@@ -151,6 +193,25 @@ const HomeScreen: React.FC = () => {
           }
         />
       );
+    } else if (category === "favorites") {
+      return (
+        <FlatList
+          data={favorites}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <Card style={styles.card}>
+              <Image source={item.image} style={styles.cardImage} />
+              <Card.Content>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.description}>{item.description}</Text>
+              </Card.Content>
+            </Card>
+          )}
+          ListEmptyComponent={
+            <Text style={styles.noDataText}>No favorites added</Text>
+          }
+        />
+      );
     }
   };
 
@@ -163,7 +224,6 @@ const HomeScreen: React.FC = () => {
           style={styles.headerLogo}
         />
         <Text style={styles.headerTitle}>Universitas Islam Riau NEWS</Text>
-        
       </View>
 
       {/* Search */}
@@ -191,14 +251,7 @@ const HomeScreen: React.FC = () => {
         <TouchableOpacity onPress={() => setCategory("weather")}>
           <Text style={styles.tabText}>Cuaca</Text>
         </TouchableOpacity>
-      </View>
-
-      {/* Breaking News */}
-      <View style={styles.breakingNewsContainer}>
-        <Text style={styles.breakingNewsTitle}>Breaking News</Text>
-        <TouchableOpacity>
-          <Text style={styles.viewAllText}>Lihat Semua >></Text>
-        </TouchableOpacity>
+       
       </View>
 
       {/* Content */}
@@ -229,10 +282,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
   },
-  notificationIcon: {
-    width: 24,
-    height: 24,
-  },
   searchContainer: {
     padding: 10,
     backgroundColor: "#ffffff",
@@ -254,21 +303,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#009688",
     fontWeight: "bold",
-  },
-  breakingNewsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
-    backgroundColor: "#ffffff",
-  },
-  breakingNewsTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  viewAllText: {
-    fontSize: 14,
-    color: "#009688",
   },
   card: {
     margin: 10,
@@ -294,6 +328,11 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     fontSize: 16,
     color: "#999",
+  },
+  favoriteIcon: {
+    position: "absolute",
+    top: 10,
+    right: 10,
   },
 });
 

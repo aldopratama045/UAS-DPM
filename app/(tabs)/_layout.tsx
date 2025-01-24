@@ -60,6 +60,9 @@ export default function TabLayout() {
                         case 'explore':
                             iconName = 'map.fill';
                             break;
+                        case 'favorite':
+                            iconName = 'heart.fill';
+                            break;
                         default:
                             iconName = 'circle';
                     }
@@ -97,6 +100,14 @@ export default function TabLayout() {
                     title: 'Explore',
                 }}
             />
+            <Tabs.Screen
+                name="favorite"
+                options={{
+                    title: 'Favorites',
+                }}
+            />
         </Tabs>
     );
 }
+    
+
